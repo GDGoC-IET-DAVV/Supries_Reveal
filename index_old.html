@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>404 | SYSTEM FAILURE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --base-color: #000000;
+            --glow-color: rgba(255, 0, 0, 0.6);
+            --highlight-color: rgba(255, 50, 50, 0.9);
+            --stranger-red: #e71d23;
+        }
+
+        body {
+            background-color: var(--base-color);
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+
+        /* --- INTRO OVERLAY --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-out;
+        }
+
+        #enter-btn {
+            background: transparent;
+            color: var(--stranger-red);
+            font-family: 'Libre Baskerville', serif;
+            font-size: 2rem;
+            border: 2px solid var(--stranger-red);
+            padding: 15px 40px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--stranger-red);
+            text-shadow: 0 0 10px var(--stranger-red);
+            letter-spacing: 5px;
+            transition: all 0.3s;
+        }
+
+        #enter-btn:hover {
+            background: var(--stranger-red);
+            color: #000;
+            box-shadow: 0 0 30px var(--stranger-red);
+        }
+
+        /* --- LOGO CONTAINER --- */
+        #bg-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.5);
+            width: 600px; 
+            height: 400px;
+            z-index: -1;
+            pointer-events: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+        }
+
+        /* --- GEOMETRY --- */
+        .bracket {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            opacity: 0; /* Hidden initially */
+        }
+
+        /* Animate only when started */
+        .started .bracket-left { animation: slowReveal 5s ease-out forwards; }
+        .started .bracket-right { animation: slowReveal 5s ease-out 4s forwards; }
+
+        @keyframes slowReveal {
+            0% { opacity: 0; filter: blur(10px); }
+            100% { opacity: 1; filter: blur(0px); }
+        }
+
+        .pill {
+            position: absolute;
+            width: 260px;
+            height: 100px;
+            background-color: var(--base-color);
+            border-radius: 999px;
+            transition: transform 1s cubic-bezier(0.1, 0.7, 1.0, 0.1), opacity 1s;
+        }
+
+        /* Lighting */
+        .bracket-left .top,
+        .bracket-right .bottom {
+            border: 1px solid rgba(255, 0, 0, 0.6);
+            box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .bracket-left .bottom,
+        .bracket-right .top {
+            border: 1.5px solid var(--highlight-color);
+            box-shadow: 
+                0 0 5px var(--highlight-color), 
+                0 0 30px var(--glow-color),
+                inset 0 0 10px rgba(100, 0, 0, 0.5);
+            z-index: 10; 
+        }
+
+        /* Geometry */
+        .bracket-left { justify-content: flex-start; }
+        .bracket-left .pill { transform-origin: 50px 50%; left: 0; }
+        .bracket-left .top { transform: rotate(-40deg); }
+        .bracket-left .bottom { transform: rotate(40deg); }
+
+        .bracket-right { justify-content: flex-end; }
+        .bracket-right .pill { transform-origin: calc(100% - 50px) 50%; right: 0; }
+        .bracket-right .top { transform: rotate(40deg); }
+        .bracket-right .bottom { transform: rotate(-40deg); }
+
+
+        /* --- TEXT STYLING --- */
+        .text-container {
+            z-index: 2;
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            transition: transform 0.8s ease-in, opacity 0.5s;
+        }
+
+        /* Animate only when started */
+        .started .text-container {
+            animation: fadeInText 3s ease-out 8s forwards;
+        }
+
+        h1 {
+            margin: 0;
+            padding-bottom: 20px;
+            font-family: 'Libre Baskerville', serif;
+            font-weight: 700;
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            color: #000; 
+            -webkit-text-stroke: 2px var(--stranger-red); 
+            text-shadow: 
+                0 0 15px rgba(231, 29, 35, 0.5),
+                0 0 30px rgba(231, 29, 35, 0.3);
+            line-height: 1.1;
+        }
+        
+        h1::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--stranger-red);
+            box-shadow: 0 0 10px var(--stranger-red);
+            margin-bottom: 10px;
+            transform: scaleX(0);
+        }
+
+        /* Animate line only when started */
+        .started h1::before {
+            animation: expandBar 2s ease-out 9s forwards;
+        }
+
+        @keyframes expandBar { to { transform: scaleX(1); } }
+
+        p {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            margin: 10px 0 0 0;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            letter-spacing: 2px;
+            color: #ddd;
+        }
+
+        .dot { animation: blink 1.4s infinite both; margin-left: 2px; }
+        .dot:nth-child(1) { animation-delay: 0s; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            20% { opacity: 1; text-shadow: 0 0 5px red; }
+            100% { opacity: 0.2; }
+        }
+
+        #countdown {
+            margin-top: 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 0 15px red;
+            border-top: 1px solid rgba(255, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+            padding: 10px 20px;
+            background: rgba(20, 0, 0, 0.5);
+            transition: transform 0.8s ease-out;
+        }
+
+        @keyframes fadeInText { to { opacity: 1; } }
+
+        /* --- BUTTON --- */
+        #runaway-btn {
+            margin-top: 60px;
+            padding: 12px 24px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #000;
+            color: red;
+            border: 1px solid red;
+            position: absolute; 
+            top: 70%;
+            z-index: 100;
+            box-shadow: 0 0 10px red;
+            opacity: 0;
+            text-transform: uppercase;
+            /* Animation applied in JS/CSS via started class */
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.1s; 
+        }
+
+        .started #runaway-btn {
+            animation: fadeInText 2s ease-out 10s forwards;
+        }
+
+        /* Mobile */
+        @media only screen and (max-width: 768px) {
+            #bg-logo {
+                width: 600px;
+                transform: translate(-50%, -50%) scale(0.55); 
+                padding: 0 50px;
+            }
+            h1 { font-size: 1.8rem; letter-spacing: 0px; }
+            p { font-size: 1rem; }
+            #countdown { font-size: 0.9rem; padding: 8px 5px; letter-spacing: 1px; width: 100%; }
+            #runaway-btn { top: 80%; padding: 15px 30px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <audio id="theme-audio" src="Stranger_Things.MP3"></audio>
+
+    <div id="intro-overlay">
+        <button id="enter-btn">ENTER</button>
+    </div>
+
+    <div id="bg-logo">
+        <div class="bracket bracket-left">
+            <div class="pill top explode-target"></div>
+            <div class="pill bottom explode-target"></div>
+        </div>
+        <div class="bracket bracket-right">
+            <div class="pill top explode-target"></div>
+            <div class="pill bottom explode-target"></div>
+        </div>
+    </div>
+
+    <div class="text-container explode-target">
+        <h1>404 | NOT FOUND</h1>
+        <p>coming SOON <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></p>
+        <div id="countdown" class="explode-target">Loading Timeline...</div>
+    </div>
+
+    <button id="runaway-btn" class="explode-target">Enter Upside Down</button>
+
+    <script>
+        // --- 1. ENTER LOGIC ---
+        const enterBtn = document.getElementById('enter-btn');
+        const overlay = document.getElementById('intro-overlay');
+        const audio = document.getElementById('theme-audio');
+
+        enterBtn.addEventListener('click', () => {
+            // Play audio (no loop)
+            audio.play();
+            // Hide overlay
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 1000);
+            // Trigger animations
+            document.body.classList.add('started');
+        });
+
+        // --- 2. COUNTDOWN ---
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 10); 
+        let timerInterval;
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            const display = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            const el = document.getElementById("countdown");
+            if(el) el.innerHTML = display;
+        }
+        timerInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // --- 3. RUNAWAY & PHYSICS ---
+        const btn = document.getElementById('runaway-btn');
+        let exploded = false;
+
+        function moveButton(e) {
+            // STOP on Mobile (allow click), Stop if exploded
+            if (window.innerWidth < 768 || exploded) return; 
+            
+            if(e.type === 'touchstart') e.preventDefault();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const btnRect = btn.getBoundingClientRect();
+            
+            const maxX = viewportWidth - btnRect.width - 20;
+            const maxY = viewportHeight - btnRect.height - 20;
+            
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+        }
+
+        btn.addEventListener('mouseover', moveButton);
+        btn.addEventListener('touchstart', moveButton, {passive: false});
+
+        function triggerEffect() {
+            if(exploded) return;
+            exploded = true;
+            clearInterval(timerInterval);
+
+            document.body.style.backgroundColor = "#500000"; 
+            setTimeout(() => { document.body.style.backgroundColor = "#000000"; }, 200);
+
+            btn.innerText = window.innerWidth < 768 ? "SIGNAL LOST" : "CRITICAL ERROR";
+            btn.style.backgroundColor = window.innerWidth < 768 ? "transparent" : "red";
+            btn.style.borderColor = window.innerWidth < 768 ? "transparent" : "red";
+            if(window.innerWidth < 768) btn.style.boxShadow = "none";
+            btn.style.color = window.innerWidth < 768 ? "red" : "black";
+            
+            const targets = document.querySelectorAll('.explode-target, h1, p');
+            const isMobile = window.innerWidth < 768;
+
+            targets.forEach(el => {
+                const screenW = window.innerWidth;
+                const screenH = window.innerHeight;
+                const randomX = (Math.random() - 0.5) * screenW * (isMobile ? 3 : 1.5);
+                const randomY = (Math.random() - 0.5) * screenH * (isMobile ? 3 : 1.5);
+                const randomRotate = (Math.random() - 0.5) * (isMobile ? 60 : 720); 
+
+                if (isMobile) {
+                    el.style.transition = "transform 20s ease-out, opacity 20s ease-out";
+                    el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg)`;
+                    el.style.opacity = "0";
+                } else {
+                    el.style.transition = "all 1s cubic-bezier(0.25, 1, 0.5, 1)";
+                    el.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg) scale(0)`;
+                    el.style.opacity = "0";
+                }
+            });
+
+            setTimeout(() => {
+                const msg = document.createElement("div");
+                msg.innerText = "Not yet";
+                msg.style.position = "fixed";
+                msg.style.top = "50%";
+                msg.style.left = "50%";
+                msg.style.transform = "translate(-50%, -50%)";
+                msg.style.color = "red";
+                msg.style.fontFamily = "'Courier New', monospace";
+                msg.style.fontSize = "2rem";
+                msg.style.letterSpacing = "5px";
+                msg.style.textShadow = "0 0 20px red";
+                document.body.appendChild(msg);
+            }, isMobile ? 2000 : 1000);
+        }
+
+        btn.addEventListener('click', triggerEffect);
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            triggerEffect();
+        }, {passive: false});
+
+    </script>
+</body>
+</html>
