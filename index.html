@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>404 | SYSTEM FAILURE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Bebas+Neue&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 1. GLOBAL & LAYERS --- */
+        :root {
+            --base-color: #000000;
+            --stranger-red: #e71d23;
+            --bulb-glow: rgba(255, 255, 255, 0.8);
+        }
+
+        body {
+            background-color: var(--base-color);
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* --- BACKGROUND VIDEOS --- */
+        #bg-video, #meme-video {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+        }
+        
+        #bg-video { z-index: -2; opacity: 0; transition: opacity 4s ease-in-out; }
+        .started #bg-video { opacity: 0.5; }
+
+        /* Meme video is hidden by default, shown on win */
+        #meme-video { z-index: 5000; display: none; }
+
+        /* Dust Particles */
+        #dust-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+        }
+
+        /* --- 2. INTRO OVERLAY --- */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            cursor: pointer; transition: opacity 1s ease-out; 
+        }
+
+        .netflix-text {
+            font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: #e50914; 
+            letter-spacing: 2px; opacity: 0; transition: opacity 1s;
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.5); pointer-events: none;
+        }
+
+        /* Crack Visuals */
+        .crack-container { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        .crack-path {
+            fill: none; stroke: #070707; stroke-width: 0; stroke-linecap: round; stroke-linejoin: round;
+            opacity: 0; stroke-dasharray: 400; stroke-dashoffset: 400;
+            filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px #000);
+            transition: stroke-width 0.35s ease-out, stroke-dashoffset 0.9s ease-out, opacity 0.4s ease-out;
+        }
+        .upside-down-mode .crack-path {
+            stroke: #ff0000;
+            filter: drop-shadow(0 0 3px #000) drop-shadow(0 0 8px #ff0000) drop-shadow(0 0 18px rgba(255, 0, 0, 1));
+            animation: pulse-veins 0.6s infinite alternate;
+        }
+        @keyframes pulse-veins { from { stroke-opacity: 0.9; } to { stroke-opacity: 0.5; } }
+        .shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+        .shake-hard { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 2px, 0); } 20%, 80% { transform: translate3d(4px, -2px, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 4px, 0); } 40%, 60% { transform: translate3d(6px, -4px, 0); }
+        }
+
+        /* --- 3. MAIN CONTENT --- */
+        #main-content {
+            transition: opacity 1s;
+            width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        #bg-logo {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);
+            width: 600px; height: 400px; z-index: 1; pointer-events: none;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 50px;
+        }
+        .bracket { position: relative; width: 200px; height: 200px; display: flex; align-items: center; opacity: 0; }
+        .started .bracket-left { animation: slowReveal 5s ease-out forwards; }
+        .started .bracket-right { animation: slowReveal 5s ease-out 4s forwards; }
+        @keyframes slowReveal { 0% { opacity: 0; filter: blur(10px); } 100% { opacity: 1; filter: blur(0px); } }
+        .pill { position: absolute; width: 260px; height: 100px; background-color: var(--base-color); border-radius: 999px; transition: transform 1s, opacity 1s; }
+        .bracket-left .top, .bracket-right .bottom { border: 1px solid rgba(255, 0, 0, 0.6); box-shadow: 0 0 8px rgba(255, 0, 0, 0.4); z-index: 1; }
+        .bracket-left .bottom, .bracket-right .top { border: 1.5px solid rgba(255, 50, 50, 0.9); box-shadow: 0 0 5px red, 0 0 30px rgba(255,0,0,0.6), inset 0 0 10px rgba(100,0,0,0.5); z-index: 10; }
+        .bracket-left { justify-content: flex-start; } .bracket-left .pill { transform-origin: 50px 50%; left: 0; } .bracket-left .top { transform: rotate(-40deg); } .bracket-left .bottom { transform: rotate(40deg); }
+        .bracket-right { justify-content: flex-end; } .bracket-right .pill { transform-origin: calc(100% - 50px) 50%; right: 0; } .bracket-right .top { transform: rotate(40deg); } .bracket-right .bottom { transform: rotate(-40deg); }
+
+        .text-container { z-index: 2; opacity: 0; display: flex; flex-direction: column; align-items: center; width: 90%; transition: transform 0.8s ease-in, opacity 0.5s; }
+        .started .text-container { animation: fadeInText 3s ease-out 8s forwards; }
+        h1 { margin: 0; padding-bottom: 20px; font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 3.5rem; text-transform: uppercase; letter-spacing: -2px; color: #000; -webkit-text-stroke: 2px var(--stranger-red); text-shadow: 0 0 15px rgba(231, 29, 35, 0.5); line-height: 1.1; }
+        h1::before { content: ''; display: block; width: 100%; height: 2px; background: var(--stranger-red); box-shadow: 0 0 10px var(--stranger-red); margin-bottom: 10px; transform: scaleX(0); }
+        .started h1::before { animation: expandBar 2s ease-out 9s forwards; }
+        @keyframes expandBar { to { transform: scaleX(1); } }
+        p { font-family: 'Courier New', Courier, monospace; font-size: 1.2rem; margin: 10px 0 0 0; text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); letter-spacing: 2px; color: #ddd; }
+        .dot { animation: blink 1.4s infinite both; margin-left: 2px; } .dot:nth-child(1) { animation-delay: 0s; } .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; text-shadow: 0 0 5px red; } 100% { opacity: 0.2; } }
+        
+        #countdown { margin-top: 30px; font-family: 'Courier New', Courier, monospace; font-size: 1.5rem; letter-spacing: 3px; color: #fff; text-shadow: 0 0 15px red; border-top: 1px solid rgba(255,0,0,0.3); border-bottom: 1px solid rgba(255,0,0,0.3); padding: 10px 20px; background: rgba(20,0,0,0.5); transition: transform 0.8s ease-out; }
+        @keyframes fadeInText { to { opacity: 1; } }
+
+        #runaway-btn { margin-top: 60px; padding: 12px 24px; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 14px; cursor: pointer; background-color: #000; color: red; border: 1px solid red; position: absolute; top: 70%; z-index: 100; box-shadow: 0 0 10px red; opacity: 0; text-transform: uppercase; -webkit-tap-highlight-color: transparent; transition: transform 0.1s; }
+        .started #runaway-btn { animation: fadeInText 2s ease-out 10s forwards; }
+
+        /* Quote Container */
+        #quote-container {
+            position: fixed; bottom: 20px; width: 90%; text-align: center; opacity: 0; z-index: 50; transition: opacity 0.3s; pointer-events: none;
+        }
+        #quote-text { font-family: 'Libre Baskerville', serif; font-size: 1.2rem; color: #fff; text-shadow: 0 0 8px var(--stranger-red); font-style: italic; margin: 0; }
+        #quote-author { display: block; margin-top: 5px; font-family: 'Courier New', monospace; font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* ========================================= */
+        /* === GAME OVERLAY STYLES (THE WALL) === */
+        /* ========================================= */
+        #game-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2000; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            background-color: #050000; 
+            background-image: radial-gradient(circle, #2b0000 0%, #000000 80%);
+            box-shadow: inset 0 0 100px #000;
+            opacity: 0; transition: opacity 1s ease-in;
+        }
+
+        #wall-instruction {
+            font-family: 'Libre Baskerville', serif; color: #ff0033; font-size: 1.5rem; 
+            margin-bottom: 20px; z-index: 2001; text-shadow: 0 0 15px #ff0033; letter-spacing: 4px; text-transform: uppercase;
+            animation: text-flicker-red 4s infinite;
+        }
+        @keyframes text-flicker-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } 52% { opacity: 0.4; } 54% { opacity: 0.8; } }
+
+        #alphabet-wall {
+            display: flex; flex-wrap: wrap; justify-content: center; width: 95%; max-width: 900px; gap: 15px; z-index: 1001;
+        }
+
+        .letter-container {
+            display: flex; flex-direction: column; align-items: center; width: 50px; position: relative; cursor: pointer;
+        }
+
+        .wire {
+            position: absolute; top: -10px; left: -25px; width: 80px; height: 2px; background: #222; transform: rotate(10deg); z-index: 0; pointer-events: none;
+        }
+
+        .bulb {
+            width: 20px; height: 35px; border-radius: 50%; background: #444; margin-bottom: 2px; z-index: 1;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.5), 0 0 2px #000; transition: all 0.1s;
+        }
+
+        .letter-char {
+            font-family: 'Permanent Marker', cursive; font-size: 2.5rem; color: #dcdcdc; 
+            text-shadow: 2px 2px 4px #000; opacity: 0.9;
+            width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; 
+        }
+
+        /* Bulb Glow Colors */
+        .bulb.glow-red { background: #ff0000; box-shadow: 0 0 20px #ff0000, inset 5px 5px 10px #fff; }
+        .bulb.glow-blue { background: #00eaff; box-shadow: 0 0 20px #00eaff, inset 5px 5px 10px #fff; }
+        .bulb.glow-yellow { background: #ffea00; box-shadow: 0 0 20px #ffea00, inset 5px 5px 10px #fff; }
+        .bulb.glow-green { background: #33ff00; box-shadow: 0 0 20px #33ff00, inset 5px 5px 10px #fff; }
+
+        @media only screen and (max-width: 768px) {
+            #bg-logo { width: 600px; transform: translate(-50%, -50%) scale(0.55); padding: 0 50px; }
+            h1 { font-size: 1.8rem; letter-spacing: 0px; }
+            p { font-size: 1rem; }
+            #countdown { font-size: 0.9rem; padding: 8px 5px; letter-spacing: 1px; width: 100%; }
+            #runaway-btn { top: 80%; padding: 15px 30px; }
+            .netflix-text { font-size: 2.5rem; }
+            #quote-text { font-size: 1rem; }
+            #quote-container { bottom: 40px; }
+            .letter-char { font-size: 1.8rem; width: 40px; }
+            .letter-container { width: 40px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <video id="bg-video" autoplay muted loop playsinline>
+        <source src="mobile_bg.mp4" type="video/mp4" media="(max-width: 768px)">
+        <source src="desktop_bg.mp4" type="video/mp4">
+    </video>
+
+    <video id="meme-video" controls playsinline>
+        <source src="meme.mp4" type="video/mp4">
+    </video>
+
+    <audio id="theme-audio" src="Stranger_Things.MP3"></audio>
+    <audio id="hammer-audio" src="hammer.mp3"></audio>
+
+    <canvas id="dust-canvas"></canvas>
+
+    <div id="intro-overlay">
+        <div id="intro-msg" class="netflix-text">INHALE...</div>
+        <svg class="crack-container" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path id="crack1" class="crack-path" d="" />
+            <path id="crack2" class="crack-path" d="" />
+            <path id="crack3" class="crack-path" d="" />
+        </svg>
+    </div>
+
+    <div id="main-content">
+        <div id="bg-logo">
+            <div class="bracket bracket-left">
+                <div class="pill top explode-target"></div>
+                <div class="pill bottom explode-target"></div>
+            </div>
+            <div class="bracket bracket-right">
+                <div class="pill top explode-target"></div>
+                <div class="pill bottom explode-target"></div>
+            </div>
+        </div>
+
+        <div class="text-container explode-target">
+            <h1>404 | NOT FOUND</h1>
+            <p>coming SOON <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></p>
+            <div id="countdown" class="explode-target">Loading Timeline...</div>
+        </div>
+
+        <div id="quote-container">
+            <p id="quote-text"></p>
+            <span id="quote-author"></span>
+        </div>
+
+        <button id="runaway-btn" class="explode-target">Enter Upside Down</button>
+    </div>
+
+    <div id="game-overlay">
+        <div id="wall-instruction">WATCH THE LIGHTS...</div>
+        <div id="alphabet-wall"></div>
+    </div>
+
+    <script>
+        // --- 1. DUST SYSTEM ---
+        const canvas = document.getElementById('dust-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Particle {
+            constructor() { this.x=Math.random()*width; this.y=Math.random()*height; this.vx=(Math.random()-0.5)*0.5; this.vy=(Math.random()-0.5)*0.5; this.size=Math.random()*2; this.alpha=Math.random()*0.5; }
+            update() { this.x+=this.vx; this.y+=this.vy; if(this.x<0)this.x=width; if(this.x>width)this.x=0; if(this.y<0)this.y=height; if(this.y>height)this.y=0; }
+            draw() { ctx.fillStyle=`rgba(180, 180, 180, ${this.alpha})`; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
+        }
+        for(let i=0; i<80; i++) particles.push(new Particle());
+        function animateDust() { ctx.clearRect(0,0,width,height); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateDust); }
+        animateDust();
+
+        // --- 2. CRACKS & INTRO ---
+        const introOverlay = document.getElementById('intro-overlay');
+        const introMsg = document.getElementById('intro-msg');
+        const hammerAudio = document.getElementById('hammer-audio');
+        let hitCount = 0; let canHit = false;
+
+        function makeJitterLine(x1, y1, x2, y2, segments, roughness) {
+            let pts = []; const dx = x2 - x1; const dy = y2 - y1; const len = Math.hypot(dx, dy) || 1; const nx = -dy / len; const ny = dx / len;
+            pts.push({ x: x1, y: y1 });
+            for (let i = 1; i < segments; i++) { const t = i / segments; let x = x1 + dx * t; let y = y1 + dy * t; const off = (Math.random() - 0.5) * roughness; x += nx * off; y += ny * off; pts.push({ x, y }); }
+            pts.push({ x: x2, y: y2 });
+            return "M" + pts.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(" L");
+        }
+        function generateWallCracks() {
+            const p1 = document.getElementById("crack1"), p2 = document.getElementById("crack2"), p3 = document.getElementById("crack3");
+            if (!p1) return;
+            p1.setAttribute("d", makeJitterLine(0, 45, 100, 52, 35, 5));
+            p2.setAttribute("d", makeJitterLine(65, 5, 70, 95, 30, 6) + " " + makeJitterLine(30, 60, 15, 80, 10, 4));
+            p3.setAttribute("d", makeJitterLine(55, 40, 40, 20, 12, 4) + " " + makeJitterLine(80, 60, 95, 75, 10, 4));
+        }
+        function growCrack(pathId, widthPx) {
+            const path = document.getElementById(pathId); if (!path) return;
+            const length = path.getTotalLength();
+            path.style.strokeDasharray = length; path.style.strokeDashoffset = length;
+            path.getBoundingClientRect(); path.style.opacity = 1; path.style.strokeWidth = widthPx + "px"; path.style.strokeDashoffset = 0;
+        }
+        generateWallCracks();
+
+        setTimeout(() => { introMsg.style.opacity = 1; }, 500); 
+        setTimeout(() => { 
+            introMsg.style.opacity = 0; 
+            setTimeout(() => { introMsg.innerText = "HOLD YOUR BREATH"; introMsg.style.opacity = 1; canHit = true; }, 1000);
+        }, 2500);
+
+        function handleSmash(e) {
+            if(!canHit) return;
+            hitCount++;
+            hammerAudio.currentTime = 0; hammerAudio.volume = Math.min(1, 0.4 + (hitCount * 0.2)); 
+            introOverlay.classList.remove('shake', 'shake-hard'); void introOverlay.offsetWidth; 
+
+            if(hitCount === 1) { introMsg.style.opacity = 0; growCrack('crack1', 0.8); hammerAudio.playbackRate = 1.0; introOverlay.classList.add('shake'); if(navigator.vibrate) navigator.vibrate(50); }
+            else if(hitCount === 2) { growCrack('crack2', 0.7); hammerAudio.playbackRate = 0.9; introOverlay.classList.add('shake'); if(navigator.vibrate) navigator.vibrate(100); }
+            else if(hitCount === 3) { growCrack('crack3', 0.7); introOverlay.classList.add('upside-down-mode'); introOverlay.classList.add('shake-hard'); hammerAudio.playbackRate = 0.7; if(navigator.vibrate) navigator.vibrate([100, 50, 100]); }
+            else if(hitCount === 4) {
+                hammerAudio.playbackRate = 1.2; if(navigator.vibrate) navigator.vibrate(500);
+                introOverlay.style.opacity = 0; setTimeout(() => { introOverlay.style.display = 'none'; }, 1000);
+                document.body.classList.add('started'); document.getElementById('theme-audio').play().catch(()=>{});
+            }
+            if(hitCount <= 4) hammerAudio.play().catch(e=>console.log(e));
+        }
+        introOverlay.addEventListener('mousedown', handleSmash);
+        introOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); handleSmash(); }, {passive: false});
+
+        // --- 4. COUNTDOWN ---
+        const targetDate = new Date('December 12, 2025 12:12:12');
+        function updateCountdown() {
+            const now = new Date().getTime(); const distance = targetDate - now;
+            if (distance < 0) { document.getElementById("countdown").innerHTML = "0d 0h 0m 0s"; return; }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById("countdown").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        setInterval(updateCountdown, 1000); updateCountdown();
+
+        // --- 5. RUNAWAY BUTTON ---
+        const btn = document.getElementById('runaway-btn');
+        const quoteContainer = document.getElementById('quote-container');
+        const quoteText = document.getElementById('quote-text');
+        const quoteAuthor = document.getElementById('quote-author');
+        let moveCount = 0; 
+
+        const quotes = [
+            { text: "Do you copy?", author: "Mike Wheeler" },
+            { text: "Mouthbreather.", author: "Eleven" },
+            { text: "Friends don't lie.", author: "Eleven" },
+            { text: "Code Red!", author: "Dustin Henderson" },
+            { text: "It's a trap!", author: "Mike Wheeler" },
+            { text: "This is not a drill!", author: "Mike Wheeler" },
+            { text: "Don't you dare walk away from me!", author: "Hopper" },
+            { text: "I am on a curiosity voyage.", author: "Dustin Henderson" },
+            { text: "She's our friend and she's crazy!", author: "Dustin Henderson" },
+            { text: "The gate... I opened it.", author: "Eleven" }
+        ];
+
+        function moveButton(e) {
+            // STOP moving after 10 times
+            if (moveCount >= 10) return; 
+            
+            // On Mobile: Don't move at all, so user can click it immediately
+            if (window.innerWidth < 768) return; 
+            
+            if(e.type === 'touchstart') e.preventDefault();
+            
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const btnRect = btn.getBoundingClientRect();
+            const maxX = viewportWidth - btnRect.width - 20;
+            const maxY = viewportHeight - btnRect.height - 20;
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+            
+            if(quotes[moveCount]) {
+                quoteText.innerText = `"${quotes[moveCount].text}"`;
+                quoteAuthor.innerText = `- ${quotes[moveCount].author}`;
+                quoteContainer.style.opacity = 1;
+            }
+            moveCount++; 
+        }
+
+        btn.addEventListener('mouseover', moveButton);
+        btn.addEventListener('touchstart', moveButton, {passive: false});
+
+        // --- CLICK HANDLER (Starts Game) ---
+        btn.addEventListener('click', (e) => {
+            // FIX: Allow click if 10 moves OR if on mobile (width < 768)
+            if (moveCount >= 10 || window.innerWidth < 768) {
+                 console.log("Starting Light Game...");
+                 
+                 // Hide Main Content
+                 document.getElementById('main-content').style.opacity = '0';
+                 setTimeout(() => { document.getElementById('main-content').style.display = 'none'; }, 1000);
+                 
+                 // Init Game
+                 initGame();
+            }
+        });
+
+        // ==========================================================
+        // === LIGHTBULB GAME LOGIC ===
+        // ==========================================================
+        
+        const gameOverlay = document.getElementById('game-overlay');
+        const wallContainer = document.getElementById('alphabet-wall');
+        const instructionEl = document.getElementById('wall-instruction');
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+        
+        // SLANG LEVELS
+        const levels = ["KYO", "NAHI", "HO", "RAHI", "PADHAI"];
+        
+        let currentLevel = 0;
+        let playerSequence = [];
+        let isPlayerTurn = false;
+        let gameActive = false;
+        const bulbColors = ['red', 'blue', 'yellow', 'green'];
+
+        function initGame() {
+            // Build the wall
+            wallContainer.innerHTML = '';
+            letters.forEach((char) => {
+                const div = document.createElement('div');
+                div.classList.add('letter-container');
+                div.id = `letter-${char}`;
+                const color = bulbColors[Math.floor(Math.random() * bulbColors.length)];
+                
+                div.innerHTML = `
+                    <div class="wire"></div>
+                    <div class="bulb" data-color="glow-${color}"></div>
+                    <div class="letter-char">${char}</div>
+                `;
+                
+                div.addEventListener('mousedown', () => handleInput(char));
+                div.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(char); });
+                wallContainer.appendChild(div);
+            });
+
+            // Show Overlay
+            gameOverlay.style.display = 'flex';
+            setTimeout(() => { gameOverlay.style.opacity = '1'; }, 100);
+            
+            gameActive = true;
+            currentLevel = 0;
+            startLevel();
+        }
+
+        function startLevel() {
+            isPlayerTurn = false;
+            playerSequence = [];
+            const targetWord = levels[currentLevel];
+            instructionEl.innerText = "WAIT...";
+            instructionEl.style.color = "yellow";
+
+            setTimeout(() => {
+                playSequence(targetWord, 0);
+            }, 1000);
+        }
+
+        function playSequence(word, index) {
+            if (index >= word.length) {
+                setTimeout(() => {
+                    isPlayerTurn = true;
+                    instructionEl.innerText = "REPEAT...";
+                    instructionEl.style.color = "#fff";
+                }, 500);
+                return;
+            }
+
+            const char = word[index];
+            lightUp(char);
+
+            // Speed up as levels progress
+            const delay = Math.max(400, 1000 - (currentLevel * 100));
+            setTimeout(() => { playSequence(word, index + 1); }, delay);
+        }
+
+        function lightUp(char) {
+            const el = document.getElementById(`letter-${char}`);
+            if(!el) return;
+            const bulb = el.querySelector('.bulb');
+            const colorClass = bulb.dataset.color;
+            bulb.classList.add(colorClass);
+            
+            setTimeout(() => { bulb.classList.remove(colorClass); }, 600);
+        }
+
+        function handleInput(char) {
+            if (!isPlayerTurn || !gameActive) return;
+
+            const targetWord = levels[currentLevel];
+            const expectedChar = targetWord[playerSequence.length];
+
+            lightUp(char);
+
+            if (char === expectedChar) {
+                playerSequence.push(char);
+                if (playerSequence.length === targetWord.length) {
+                    isPlayerTurn = false;
+                    currentLevel++;
+                    if (currentLevel >= levels.length) {
+                        winGame();
+                    } else {
+                        instructionEl.innerText = "GOOD...";
+                        setTimeout(startLevel, 1500);
+                    }
+                }
+            } else {
+                // Wrong input
+                isPlayerTurn = false;
+                instructionEl.innerText = "RUN.";
+                instructionEl.style.color = "red";
+                
+                const allBulbs = document.querySelectorAll('.bulb');
+                allBulbs.forEach(b => b.classList.add('glow-red'));
+                
+                setTimeout(() => {
+                    allBulbs.forEach(b => b.classList.remove('glow-red'));
+                    startLevel(); // Restart level
+                }, 1000);
+            }
+        }
+
+        function winGame() {
+            gameActive = false;
+            instructionEl.innerText = "MESSAGE RECEIVED";
+            
+            // Flash random lights for celebration
+            let flashCount = 0;
+            const flashInterval = setInterval(() => {
+                const randomChar = letters[Math.floor(Math.random() * letters.length)];
+                lightUp(randomChar);
+                flashCount++;
+                if(flashCount > 20) {
+                    clearInterval(flashInterval);
+                    playMemeVideo();
+                }
+            }, 100);
+        }
+
+        function playMemeVideo() {
+            // Hide Game
+            gameOverlay.style.opacity = '0';
+            setTimeout(() => { gameOverlay.style.display = 'none'; }, 1000);
+
+            // Play Meme Video
+            const memeVid = document.getElementById('meme-video');
+            memeVid.style.display = 'block';
+            memeVid.play();
+        }
+
+    </script>
+</body>
+</html>
